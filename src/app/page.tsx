@@ -1,5 +1,6 @@
 import { prisma } from "@/db";
 import { redirect } from "next/navigation";
+import { TodoItem } from "./components";
 
 async function addTodo(data: FormData) {
   "use server";
@@ -13,12 +14,18 @@ async function addTodo(data: FormData) {
   redirect("/");
 }
 
+async function toggleTodo(id: string, finished: boolean) {
+  "use server";
+
+  await prisma.todo.update({ where: { id }, data: { finished } });
+}
+
 export default async function Home() {
   const todos = await prisma.todo.findMany();
 
   return (
     <>
-      <header className="flex items-center justify-center p-16 mb-8">
+      <header className="flex items-center justify-center p-32">
         <h1 className="text-6xl">Tasks</h1>
       </header>
       <main className="flex flex-col items-center justify-center">
@@ -35,9 +42,11 @@ export default async function Home() {
             Add
           </button>
         </form>
-        <ul>
+        <ul className="flex flex-col justify-left mt-8">
           {todos.map((todo) => (
-            <li key={todo.id}>{todo.title}</li>
+            <li key={todo.id} className="flex gap-6 mb-4">
+              <TodoItem {...todo} onToggle={toggleTodo} />
+            </li>
           ))}
         </ul>
       </main>
