@@ -18,7 +18,7 @@ const TodoItem = (props: TodoItemProps) => {
         defaultChecked={finished}
         onChange={(e) => onToggle(id, e.target.checked)}
       />
-      <p className="text-2xl peer-checked:line-through peer-checked:text-zinc-600">
+      <p className="text-2xl peer-checked:line-through peer-checked:text-zinc-600 whitespace-nowrap text-ellipsis max-w-[12rem] overflow-hidden">
         {title}
       </p>
     </>
