@@ -1,7 +1,7 @@
 "use client";
 import { TodoItem } from "./components";
 import { useCallback, useEffect, useState } from "react";
-import { addTodo, deleteTodo, getTodos, toggleTodo } from "./server";
+import { addTodo, deleteTodo, editTodo, getTodos, toggleTodo } from "./server";
 
 type Todo = {
   id: string;
@@ -24,9 +24,8 @@ export default function Home() {
   const onAddTodo = useCallback(
     async (data: FormData) => {
       const title = data.get("title")?.valueOf();
-      if (typeof title !== "string" || title.length === 0) {
-        throw new Error("Invalid title");
-      }
+      if (typeof title !== "string" || title.length === 0) return;
+
       await addTodo(title);
       await getAllTodos();
     },
@@ -56,33 +55,49 @@ export default function Home() {
     [getAllTodos]
   );
 
+  const onEditTodo = useCallback(
+    async (id: string, newTitle: string) => {
+      await editTodo(id, newTitle);
+      const newTodos = todos.map((todo) => {
+        if (todo.id === id) {
+          return { ...todo, title: newTitle };
+        }
+
+        return todo;
+      });
+      setTodos(newTodos);
+    },
+    [todos]
+  );
+
   return (
     <>
       <header className="flex items-center justify-center p-32">
         <h1 className="text-6xl">Tasks</h1>
       </header>
-      <main className="flex flex-col items-center justify-center">
-        <form action={onAddTodo} className="flex gap-4 max-w-[32vw]">
+      <main className="flex flex-col items-center justify-center px-[5vw] xl:px-[35vw] lg:px-[20vw] md:px-[10vw]">
+        <form action={onAddTodo} className="flex gap-4 w-full justify-between">
           <input
             name="title"
-            maxLength={32}
-            placeholder="New task todo..."
-            className="py-2 rounded-lg px-4"
+            maxLength={64}
+            placeholder="New task..."
+            className="py-2 rounded-lg px-4 w-full"
           />
           <button
             type="submit"
-            className="border-1 border-black rounded-lg py-2 px-4 bg-green-500"
+            className="border-1 border-black rounded-lg py-2 w-[80px] bg-green-500"
           >
             Add
           </button>
         </form>
-        <ul className="flex flex-col justify-left mt-8 max-w-[32vw]">
+        <ul className="flex flex-col mt-8 w-full">
           {todos.map((todo: Todo) => (
             <TodoItem
               key={todo.id}
               {...todo}
-              onToggle={onToggleTodo}
+              onEdit={onEditTodo}
               onDelete={onDeleteTodo}
+              onToggle={onToggleTodo}
             />
           ))}
         </ul>
