@@ -1,27 +1,60 @@
-import { prisma } from "@/db";
-import { redirect } from "next/navigation";
+"use client";
 import { TodoItem } from "./components";
+import { useCallback, useEffect, useState } from "react";
+import { addTodo, deleteTodo, getTodos, toggleTodo } from "./server";
 
-async function addTodo(data: FormData) {
-  "use server";
+type Todo = {
+  id: string;
+  title: string;
+  finished: boolean;
+};
 
-  const title = data.get("title")?.valueOf();
-  if (typeof title !== "string" || title.length === 0) {
-    throw new Error("Invalid title");
-  }
+export default function Home() {
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-  await prisma.todo.create({ data: { title, finished: false } });
-  redirect("/");
-}
+  const getAllTodos = useCallback(async () => {
+    const todosAux = await getTodos();
+    setTodos(todosAux);
+  }, []);
 
-async function toggleTodo(id: string, finished: boolean) {
-  "use server";
+  useEffect(() => {
+    getAllTodos();
+  }, [getAllTodos]);
 
-  await prisma.todo.update({ where: { id }, data: { finished } });
-}
+  const onAddTodo = useCallback(
+    async (data: FormData) => {
+      const title = data.get("title")?.valueOf();
+      if (typeof title !== "string" || title.length === 0) {
+        throw new Error("Invalid title");
+      }
+      await addTodo(title);
+      await getAllTodos();
+    },
+    [getAllTodos]
+  );
 
-export default async function Home() {
-  const todos = await prisma.todo.findMany();
+  const onToggleTodo = useCallback(
+    async (id: string, finished: boolean) => {
+      await toggleTodo(id, finished);
+      const newTodos = todos.map((todo) => {
+        if (todo.id === id) {
+          return { ...todo, finished: !todo.finished };
+        }
+
+        return todo;
+      });
+      setTodos(newTodos);
+    },
+    [todos]
+  );
+
+  const onDeleteTodo = useCallback(
+    async (id: string) => {
+      await deleteTodo(id);
+      await getAllTodos();
+    },
+    [getAllTodos]
+  );
 
   return (
     <>
@@ -29,7 +62,7 @@ export default async function Home() {
         <h1 className="text-6xl">Tasks</h1>
       </header>
       <main className="flex flex-col items-center justify-center">
-        <form action={addTodo} className="flex gap-4">
+        <form action={onAddTodo} className="flex gap-4 max-w-[32vw]">
           <input
             name="title"
             maxLength={32}
@@ -43,11 +76,14 @@ export default async function Home() {
             Add
           </button>
         </form>
-        <ul className="flex flex-col justify-left mt-8">
-          {todos.map((todo) => (
-            <li key={todo.id} className="flex gap-6 mb-4">
-              <TodoItem {...todo} onToggle={toggleTodo} />
-            </li>
+        <ul className="flex flex-col justify-left mt-8 max-w-[32vw]">
+          {todos.map((todo: Todo) => (
+            <TodoItem
+              key={todo.id}
+              {...todo}
+              onToggle={onToggleTodo}
+              onDelete={onDeleteTodo}
+            />
           ))}
         </ul>
       </main>
