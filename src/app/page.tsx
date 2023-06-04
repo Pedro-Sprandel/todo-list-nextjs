@@ -32,6 +32,7 @@ export default async function Home() {
         <form action={addTodo} className="flex gap-4">
           <input
             name="title"
+            maxLength={32}
             placeholder="New task todo..."
             className="py-2 rounded-lg px-4"
           />
