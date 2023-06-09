@@ -2,12 +2,7 @@
 import { TodoItem } from "./components";
 import { useCallback, useEffect, useState } from "react";
 import { addTodo, deleteTodo, editTodo, getTodos, toggleTodo } from "./server";
-
-type Todo = {
-  id: string;
-  title: string;
-  finished: boolean;
-};
+import { Todo } from "./types";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -81,7 +76,7 @@ export default function Home() {
             name="title"
             maxLength={64}
             placeholder="New task..."
-            className="py-2 rounded-lg px-4 w-full"
+            className="py-2 rounded-lg px-4 w-full pr-8"
           />
           <button
             type="submit"

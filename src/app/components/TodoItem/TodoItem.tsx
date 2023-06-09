@@ -2,15 +2,13 @@
 import { useState } from "react";
 import { BsFillTrash3Fill } from "react-icons/bs";
 import { AiFillEdit } from "react-icons/ai";
+import { Todo } from "@/app/types";
 
-type TodoItemProps = {
-  id: string;
-  title: string;
-  finished: boolean;
+interface TodoItemProps extends Todo {
   onToggle: (id: string, finished: boolean) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, newTitle: string) => void;
-};
+}
 
 const TodoItem = (props: TodoItemProps) => {
   const { id, title, finished, onToggle, onDelete, onEdit } = props;

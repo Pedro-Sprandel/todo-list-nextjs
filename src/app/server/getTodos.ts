@@ -1,11 +1,6 @@
 "use server"
 import { prisma } from '@/db';
-
-type Todo = {
-  id: string;
-  title: string;
-  finished: boolean;
-}
+import { Todo } from '../types';
 
 export async function getTodos(): Promise<Todo[]> {
   const todos = await prisma.todo.findMany();
